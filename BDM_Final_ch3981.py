@@ -115,8 +115,8 @@ if __name__ == "__main__":
     output = input5.map(lambda x: [x[0],mean(x[1])])
 
 # final output
-    output = output.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
-            .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
-            .sort('cbg_fips', ascending = True)
+    df = output.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
+        .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
+        .sort('cbg_fips', ascending = True)
 
-    output.coalesce(1).write.options(header='true').csv(sys.argv[1])
+    df.coalesce(1).write.options(header='true').csv(sys.argv[1])
