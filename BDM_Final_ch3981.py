@@ -87,12 +87,14 @@ if __name__ == "__main__":
 
 # read   
     pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
+    pattern = pattern.filter(lambda row : row != pattern.first()) 
     pattern = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
     markets = sc.textFile('nyc_supermarkets.csv')
     markets = markets.map(lambda x: x.split(',')[-2]).collect()
 
     centroids = sc.textFile('nyc_cbg_centroids.csv')
+    centroids = centroids.filter(lambda row : row != centroids.first())
     centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
     centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
 
