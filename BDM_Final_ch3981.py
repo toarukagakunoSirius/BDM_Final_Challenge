@@ -94,14 +94,14 @@ if __name__ == "__main__":
     spark = SparkSession(sc)
 
 # read    
-    rdd_pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
-    header = rdd_pattern.first()
-    rdd_pattern = rdd_pattern.filter(lambda row : row != header) 
-    rdd_task1 = rdd_pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
+    pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
+    header = pattern.first()
+    pattern = pattern.filter(lambda row : row != header) 
+    pattern_clean = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
     rdd_filter = sc.textFile('nyc_supermarkets.csv')
     filter_list = rdd_filter.map(lambda x: x.split(',')[-2]).collect()
-    rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
+    rdd_task1 = pattern_clean.filter(lambda x: x[0] in filter_list)
 
     rdd_cbg = sc.textFile('nyc_cbg_centroids.csv')
     header2 = rdd_cbg.first()
