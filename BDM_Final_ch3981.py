@@ -11,21 +11,6 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext.getOrCreate()
     spark = SparkSession(sc)
 
-    pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
-    #header = pattern.first()
-    #pattern = pattern.filter(lambda row : row != header)
-    rdd_task1 = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
-
-    markets = sc.textFile('nyc_supermarkets.csv')
-    filter_list = markets.map(lambda x: x.split(',')[-2]).collect()
-    rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
-
-    centroids = sc.textFile('nyc_cbg_centroids.csv')
-    #header2 = centroids.first()
-    #centroids = centroids.filter(lambda row : row != header2) 
-    centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
-    centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
-
     def to_datelist(start,end,cbg):
         if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
         elif start =='2019-10' or end == '2019-10': return [{},cbg,{},{}]
@@ -39,6 +24,21 @@ if __name__ == "__main__":
             output[i].update(a[i])
             output[i].update(b[i])
         return output
+
+    pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
+    header = pattern.first()
+    pattern = pattern.filter(lambda row : row != header)
+    rdd_task1 = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
+
+    markets = sc.textFile('nyc_supermarkets.csv')
+    filter_list = markets.map(lambda x: x.split(',')[-2]).collect()
+    rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
+
+    centroids = sc.textFile('nyc_cbg_centroids.csv')
+    header = centroids.first()
+    centroids = centroids.filter(lambda row : row != header) 
+    centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
+    centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
 
     rdd_task2 = rdd_task1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
 
