@@ -14,11 +14,11 @@ def to_datelist(start,end,cbg):
     elif start =='2020-10' or end == '2020-10': return [{},{},{},cbg]
     else: None
 
-def merge_datelist(x,y):
+def merge_datelist(a,b):
     output = [{},{},{},{}]
-    for i in range(len(x)):
-        output[i].update(x[i])
-        output[i].update(y[i])
+    for i in range(len(a)):
+        output[i].update(a[i])
+        output[i].update(b[i])
     return output
 
 def filter_cbg(dict_in,filter_list):
