@@ -99,23 +99,23 @@ if __name__ == "__main__":
     pattern = pattern.filter(lambda row : row != header) 
     pattern_clean = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
-    rdd_filter = sc.textFile('nyc_supermarkets.csv')
-    filter_list = rdd_filter.map(lambda x: x.split(',')[-2]).collect()
-    rdd_task1 = pattern_clean.filter(lambda x: x[0] in filter_list)
+    markets = sc.textFile('nyc_supermarkets.csv')
+    filter_list = markets.map(lambda x: x.split(',')[-2]).collect()
+    pat = pattern_clean.filter(lambda x: x[0] in filter_list)
 
-    rdd_cbg = sc.textFile('nyc_cbg_centroids.csv')
-    header2 = rdd_cbg.first()
-    rdd_cbg = rdd_cbg.filter(lambda row : row != header2) 
+    cbg = sc.textFile('nyc_cbg_centroids.csv')
+    header2 = cbg.first()
+    cbg = cbg.filter(lambda row : row != header2) 
 
 # extract date
-    rdd_task2 = rdd_task1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
+    rdd_task2 = pat.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
 
 # filter nyc cbg
-    cbg_filter = rdd_cbg.map(lambda x: x.split(',')[0]).collect()
+    cbg_filter = cbg.map(lambda x: x.split(',')[0]).collect()
     rdd_task3 = rdd_task2.map(lambda x: [x[0],filter_cbg(x[1],cbg_filter)])
 
 # transform cbg centroid coordinates
-    rdd_cbg_list = rdd_cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
+    rdd_cbg_list = cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
     rdd_task4 = rdd_task3.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
 
 # median distance
