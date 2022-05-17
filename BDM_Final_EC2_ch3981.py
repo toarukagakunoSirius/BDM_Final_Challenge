@@ -18,7 +18,7 @@ if __name__ == "__main__":
     rdd_task1 = rdd_pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
     #filter_list = rdd_filter.map(lambda x: x.split(',')[-2]).collect()
-    core = sc.textFile('/tmp/bdm/core-places-nyc').map(lambda x: next(csv.reader([x])))
+    core = sc.textFile('/tmp/bdm/core-places-nyc.csv').map(lambda x: next(csv.reader([x])))
     header = core.first()
     core = core.filter(lambda row : row != header) 
     filter_list = core.map(lambda x: [x[0], x[9]])
