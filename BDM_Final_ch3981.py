@@ -127,10 +127,10 @@ if __name__ == "__main__":
                 for i in item:
                     ls.append(i[0] * i[1])
                     count += i[1]
-                ls = ls.sort()
+                ls.sort()
                 if count != 0: 
                     if count%2 == 0:
-                        output.append(str(round((ls[count/2]+ls[count/2-1])/2,2)))
+                        output.append(str(round((ls[count//2]+ls[count//2-1])/2,2)))
                     else: output.append(str(round(ls[count//2],2)))
         return output
 
