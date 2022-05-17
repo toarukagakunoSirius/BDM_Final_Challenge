@@ -7,17 +7,12 @@ from pyspark.sql import SparkSession
 from pyproj import Transformer
 from shapely.geometry import Point
 
-def date_list(date1,date2,cbgs):
-    if date1 =='2019-03' or date2 == '2019-03':
-        return [cbgs,{},{},{}]
-    elif date1 =='2019-10' or date2 == '2019-10':
-        return [{},cbgs,{},{}]
-    elif date1 =='2020-03' or date2 == '2020-03':
-        return [{},{},cbgs,{}]
-    elif date1 =='2020-10' or date2 == '2020-10':
-        return [{},{},{},cbgs]
-    else:
-        None
+def date_list(start,end,cbg):
+    if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
+    elif start =='2019-10' or end == '2019-10': return [{},cbg,{},{}]
+    elif start =='2020-03' or end == '2020-03': return [{},{},cbg,{}]
+    elif start =='2020-10' or end == '2020-10': return [{},{},{},cbg]
+    else: None
 
 def merge_by_key(a,b):
     output = [{},{},{},{}]
