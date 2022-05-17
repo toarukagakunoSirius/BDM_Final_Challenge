@@ -21,14 +21,14 @@ def merge_datelist(x,y):
         output[i].update(y[i])
     return output
 
-def filter_cbg(input,centroids):
+def filter_cbg(dict_in,filter_list):
     output = []
-    for dict_ in input:
+    for dict_ in dict_in:
         if dict_ == {}: output.append('')
         else:
             dict_out = []
             for item in dict_:
-                if item in centroids:
+                if item in filter_list:
                     dict_out.append((item,dict_[item]))
             if dict_out != []:  
                 output.append(dict_out)
@@ -36,7 +36,7 @@ def filter_cbg(input,centroids):
                 output.append('')
     return output
 
-def transform_cbg(input,centroids):
+def transform_cbg(input,transfer_list):
     t = Transformer.from_crs(4326, 2263)
     if type(input) == list: 
         list_out = []
@@ -45,25 +45,26 @@ def transform_cbg(input,centroids):
             else:
                 dict_out = []
                 for item1 in dict_:
-                    for item2 in centroids:
+                    for item2 in transfer_list:
                         if item1[0] == item2[0]:
                             dict_out.append((t.transform(item2[1],item2[2]),item1[1]))
                 list_out.append(dict_out)
         return list_out
     else:
-        for item in centroids:
+        for item in transfer_list:
             if input == item[0]:
                 return t.transform(item[1],item[2])
 
-def distance(start_list,end):
+def distance(start_list,destination):
     output = []
     for item in start_list:
-        if item == '': output.append('')
+        if item == '':
+            output.append('')
         else:
-            dist=[]
+            distance_list=[]
             for start in item:
-                dist.append((Point(start[0][0],start[0][1]).distance(Point(end[0],end[1]))/5280,start[1]))
-            output.append(dist)
+                distance_list.append((Point(start[0][0],start[0][1]).distance(Point(destination[0],destination[1]))/5280,start[1]))
+            output.append(distance_list)
     return output
 
 def mean(input):
