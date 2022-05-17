@@ -108,23 +108,23 @@ if __name__ == "__main__":
     cbg = cbg.filter(lambda row : row != header2) 
 
 # extract date
-    rdd_task2 = pat.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
+    pat_date = pat.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
 
 # filter nyc cbg
     cbg_filter = cbg.map(lambda x: x.split(',')[0]).collect()
-    rdd_task3 = rdd_task2.map(lambda x: [x[0],filter_cbg(x[1],cbg_filter)])
+    pat_date_cen = pat_date.map(lambda x: [x[0],filter_cbg(x[1],cbg_filter)])
 
 # transform cbg centroid coordinates
     rdd_cbg_list = cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
-    rdd_task4 = rdd_task3.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
+    pat_date_cen = pat_date_cen.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
 
 # median distance
-    rdd_task4 = rdd_task4.map(lambda x: [x[0],distance(x[2],x[1])])
-    rdd_task5 = rdd_task4.map(lambda x: [x[0],mean(x[1])])
+    pat_date_dis = pat_date_cen.map(lambda x: [x[0],distance(x[2],x[1])])
+    pat_date_disM = pat_date_dis.map(lambda x: [x[0],mean(x[1])])
 
 # final output
-    df_out = rdd_task5.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
+    output = pat_date_disM.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
             .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
             .sort('cbg_fips', ascending = True)
 
-    df_out.coalesce(1).write.options(header='true').csv(sys.argv[1])
+    output.coalesce(1).write.options(header='true').csv(sys.argv[1])
