@@ -11,20 +11,6 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext.getOrCreate()
     spark = SparkSession(sc)
 
-    def to_datelist(start,end,cbg):
-        if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
-        elif start =='2019-10' or end == '2019-10': return [{},cbg,{},{}]
-        elif start =='2020-03' or end == '2020-03': return [{},{},cbg,{}]
-        elif start =='2020-10' or end == '2020-10': return [{},{},{},cbg]
-        else: None
-
-    def merge_datelist(a,b):
-        output = [{},{},{},{}]
-        for i in range(len(a)):
-            output[i].update(a[i])
-            output[i].update(b[i])
-        return output
-
     pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
     header = pattern.first()
     pattern = pattern.filter(lambda row : row != header)
@@ -39,6 +25,20 @@ if __name__ == "__main__":
     centroids = centroids.filter(lambda row : row != header) 
     centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
     centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
+
+    def to_datelist(start,end,cbg):
+        if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
+        elif start =='2019-10' or end == '2019-10': return [{},cbg,{},{}]
+        elif start =='2020-03' or end == '2020-03': return [{},{},cbg,{}]
+        elif start =='2020-10' or end == '2020-10': return [{},{},{},cbg]
+        else: None
+
+    def merge_datelist(a,b):
+        output = [{},{},{},{}]
+        for i in range(len(a)):
+            output[i].update(a[i])
+            output[i].update(b[i])
+        return output
 
     rdd_task2 = rdd_task1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
 
