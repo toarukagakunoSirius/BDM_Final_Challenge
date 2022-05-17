@@ -123,15 +123,14 @@ if __name__ == "__main__":
             if item == '': output.append('')
             else:
                 ls = []
-                count = 0
-                for i in item:
-                    ls.append(i[0] * i[1])
-                    count += i[1]
+                for i in item: ls.append(i[0] * i[1])
+                ls_len = len(ls)
                 ls.sort()
-                if count != 0: 
-                    if count%2 == 0:
-                        output.append(str(round((ls[count//2]+ls[count//2-1])/2,2)))
-                    else: output.append(str(round(ls[count//2],2)))
+                index = (ls_len - 1)//2
+                if (ls_len % 2): 
+                    output.append(str(round(ls[index],2)))
+                else: 
+                    output.append(str(round((ls[index]+ls[index+1])/2,2)))
         return output
 
     rdd_task5 = rdd_task4.map(lambda x: [x[0],median(x[1])])
