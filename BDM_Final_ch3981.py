@@ -33,24 +33,22 @@ def filter_cbg(input,cbg_list):
             else: output.append('')
     return output
 
-def cbg_transfer(input,transfer_list):
+def transform_cbg(input,cbg_list):
     t = Transformer.from_crs(4326, 2263)
     if type(input) == list: 
-        list_out = []
-        for dict_ in input:
-            if dict_ == '': list_out.append('')
+        output = []
+        for item in input:
+            if item == '': output.append('')
             else:
-                dict_out = []
-                for item1 in dict_:
-                    for item2 in transfer_list:
-                        if item1[0] == item2[0]:
-                            dict_out.append((t.transform(item2[1],item2[2]),item1[1]))
-                list_out.append(dict_out)
-        return list_out
+                out = []
+                for i in item:
+                    for c in cbg_list:
+                        if i[0] == c[0]: out.append((t.transform(c[1],c[2]),i[1]))
+                output.append(out)
+        return output
     else:
-        for item in transfer_list:
-            if input == item[0]:
-                return t.transform(item[1],item[2])
+        for c in cbg_list:
+            if input == c[0]: return t.transform(c[1],c[2])
 
 def distance(start_list,destination):
     output = []
@@ -121,7 +119,7 @@ if __name__ == "__main__":
 
 # transform cbg centroid coordinates
     rdd_cbg_list = rdd_cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
-    rdd_task4 = rdd_task3.map(lambda x: [x[0],cbg_transfer(x[0],rdd_cbg_list),cbg_transfer(x[1],rdd_cbg_list)])
+    rdd_task4 = rdd_task3.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
 
 # median distance
     rdd_task4 = rdd_task4.map(lambda x: [x[0],distance(x[2],x[1])])
