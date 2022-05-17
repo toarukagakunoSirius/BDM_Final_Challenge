@@ -103,7 +103,7 @@ if __name__ == "__main__":
     header2 = core.first()
     core = core.filter(lambda row : row != header2) 
     filter_list = core.map(lambda x: [x[0], x[9]])
-    filter_list = filter_list.filter(lambda x: x[1].startswith('4451')).collect()
+    filter_list = filter_list.filter(lambda x: str(x[1]).startswith('4451')).collect()
     pat = pattern_clean.filter(lambda x: x[0] in filter_list)
 
     cbg = sc.textFile('nyc_cbg_centroids.csv')
