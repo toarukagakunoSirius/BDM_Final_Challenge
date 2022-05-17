@@ -89,30 +89,31 @@ if __name__ == "__main__":
     pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
     header = pattern.first()
     pattern = pattern.filter(lambda row : row != header)
-    rdd_task1 = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
+    pattern_clean = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
     markets = sc.textFile('nyc_supermarkets.csv')
     filter_list = markets.map(lambda x: x.split(',')[-2]).collect()
-    rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
-
-    rdd_task2 = rdd_task1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
+    pattern_clean = pattern_clean.filter(lambda x: x[0] in filter_list)
 
     centroids = sc.textFile('nyc_cbg_centroids.csv')
     header = centroids.first()
     centroids = centroids.filter(lambda row : row != header) 
+
+    pat_date = pattern_clean.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
+
     centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
 
-    rdd_task3 = rdd_task2.map(lambda x: [x[0],filter_cbg(x[1],centroids_filter)])
+    pat_date_cen = pat_date.map(lambda x: [x[0],filter_cbg(x[1],centroids_filter)])
 
     centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
 
-    rdd_task4 = rdd_task3.map(lambda x: [x[0],transform_cbg(x[0],centroids_list),transform_cbg(x[1],centroids_list)])
+    pat_date_cen = pat_date_cen.map(lambda x: [x[0],transform_cbg(x[0],centroids_list),transform_cbg(x[1],centroids_list)])
 
-    rdd_task4 = rdd_task4.map(lambda x: [x[0],distance(x[2],x[1])])
+    pat_date_dis = pat_date_cen.map(lambda x: [x[0],distance(x[2],x[1])])
 
-    rdd_task5 = rdd_task4.map(lambda x: [x[0],mean(x[1])])
+    pat_date_disM = pat_date_dis.map(lambda x: [x[0],mean(x[1])])
 
-    df_out = rdd_task5.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
+    df_out = pat_date_disM.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
             .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
             .sort('cbg_fips', ascending = True)
 
