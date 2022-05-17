@@ -11,13 +11,17 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext.getOrCreate()
     spark = SparkSession(sc)
 
-# def list
-    def to_datelist(start,end,cbg):
-        if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
-        elif start =='2019-10' or end == '2019-10': return [{},cbg,{},{}]
-        elif start =='2020-03' or end == '2020-03': return [{},{},cbg,{}]
-        elif start =='2020-10' or end == '2020-10': return [{},{},{},cbg]
-        else: None
+    def to_datelist(date1,date2,cbgs):
+        if date1 =='2019-03' or date2 == '2019-03':
+            return [cbgs,{},{},{}]
+        elif date1 =='2019-10' or date2 == '2019-10':
+            return [{},cbgs,{},{}]
+        elif date1 =='2020-03' or date2 == '2020-03':
+            return [{},{},cbgs,{}]
+        elif date1 =='2020-10' or date2 == '2020-10':
+            return [{},{},{},cbgs]
+        else:
+            None
 
     def merge_datelist(a,b):
         output = [{},{},{},{}]
@@ -33,12 +37,15 @@ if __name__ == "__main__":
             else:
                 dict_out = []
                 for item in dict_:
-                    if item in filter_list: dict_out.append((item,dict_[item]))
-                if dict_out != []: output.append(dict_out)
-                else: output.append('')
+                    if item in filter_list:
+                        dict_out.append((item,dict_[item]))
+                if dict_out != []:  
+                    output.append(dict_out)
+                else:
+                    output.append('')
         return output
 
-    def transfer_cbg(input,transfer_list):
+    def transform_cbg(input,transfer_list):
         t = Transformer.from_crs(4326, 2263)
         if type(input) == list: 
             list_out = []
@@ -84,41 +91,42 @@ if __name__ == "__main__":
                     output.append(str(round(sum_/num_,2)))
         return output
 
-
-# read   
     pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
-    pattern = pattern.filter(lambda row : row != pattern.first()) 
-    pattern = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
+    header = pattern.first()
+    pattern = pattern.filter(lambda row : row != header)
 
-    markets = sc.textFile('nyc_supermarkets.csv')
-    markets = markets.map(lambda x: x.split(',')[-2]).collect()
+    rdd_filter = sc.textFile('nyc_supermarkets.csv')
+    rdd_task1 = pattern.map(lambda x: [x[0], '-'.join(x[12].split('T')[0].split('-')[:2]), '-'.join(x[13].split('T')[0].split('-')[:2]), x[18], json.loads(x[19])])
 
-    centroids = sc.textFile('nyc_cbg_centroids.csv')
-    centroids = centroids.filter(lambda row : row != centroids.first())
-    centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
-    centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
+    filter_list = rdd_filter.map(lambda x: x.split(',')[-2]).collect()
+    rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
 
-# filter market list
-    input1 = pattern.filter(lambda x: x[0] in markets)
+    rdd_task2 = rdd_task1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
 
-# filter group date
-    input2 = input1.map( lambda x: (x[3],to_datelist(x[1],x[2],x[4]))).filter(lambda x: x[1] is not None).reduceByKey(lambda x,y: merge_datelist(x,y))
+    rdd_cbg = sc.textFile('nyc_cbg_centroids.csv')
+    header2 = rdd_cbg.first()
+    rdd_cbg = rdd_cbg.filter(lambda row : row != header2) 
+    cbg_filter = rdd_cbg.map(lambda x: x.split(',')[0]).collect()
 
-# filter nyc centroid
-    input3 = input2.map(lambda x: [x[0],filter_cbg(x[1],centroids_filter)])
+ 
 
-# transfer cbg
-    input4 = input3.map(lambda x: [x[0],transfer_cbg(x[0],centroids_list),transfer_cbg(x[1],centroids_list)])
-    
-# distance
-    input5 = input4.map(lambda x: [x[0],distance(x[2],x[1])])
+    rdd_task3 = rdd_task2.map(lambda x: [x[0],filter_cbg(x[1],cbg_filter)])
 
-# mean distance
-    output = input5.map(lambda x: [x[0],mean(x[1])])
+    rdd_cbg_list = rdd_cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
 
-# final output
-    df = output.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
-        .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
-        .sort('cbg_fips', ascending = True)
 
-    df.coalesce(1).write.options(header='true').csv(sys.argv[1])
+
+    rdd_task4 = rdd_task3.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
+
+
+    rdd_task4 = rdd_task4.map(lambda x: [x[0],distance(x[2],x[1])])
+
+
+
+    rdd_task5 = rdd_task4.map(lambda x: [x[0],mean(x[1])])
+
+    df_out = rdd_task5.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
+            .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
+            .sort('cbg_fips', ascending = True)
+
+    df_out.coalesce(1).write.options(header='true').csv(sys.argv[1])
