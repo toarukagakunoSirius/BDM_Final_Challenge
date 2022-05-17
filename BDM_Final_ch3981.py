@@ -55,9 +55,9 @@ def transform_cbg(input,centroids):
             if input == item[0]:
                 return t.transform(item[1],item[2])
 
-def distance(start,end):
+def distance(start_list,end):
     output = []
-    for item in start:
+    for item in start_list:
         if item == '': output.append('')
         else:
             dist=[]
@@ -69,14 +69,16 @@ def distance(start,end):
 def mean(input):
     output = []
     for item in input:
-        if item == '': output.append('')
+        if item == '':
+            output.append('')
         else:
-            sum = 0
-            count = 0
-            for i in item:
-                sum += i[0] * i[1]
-                count += i[1]
-            if count != 0: output.append(str(round(sum/count,2)))
+            sum_ = 0
+            num_ = 0
+            for cuple in item:
+                sum_ += cuple[0] * cuple[1]
+                num_ += cuple[1]
+            if num_ != 0:
+                output.append(str(round(sum_/num_,2)))
     return output
 
 if __name__ == "__main__":
