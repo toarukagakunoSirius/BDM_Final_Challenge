@@ -118,9 +118,9 @@ if __name__ == "__main__":
     rdd_cbg_list = cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
     pat_date_cen = pat_date_cen.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
 
-# mean distance
+# median distance
     pat_date_dis = pat_date_cen.map(lambda x: [x[0],distance(x[2],x[1])])
-    pat_date_disM = pat_date_dis.map(lambda x: [x[0],mean(x[1])])
+    pat_date_disM = pat_date_dis.map(lambda x: [x[0],median(x[1])])
 
 # final output
     output = pat_date_disM.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
