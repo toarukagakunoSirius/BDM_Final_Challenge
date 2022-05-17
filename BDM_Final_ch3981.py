@@ -81,8 +81,8 @@ def mean(input):
             count = 0
             for i in item:
                 sum += i[0] * i[1]
-                num_ += i[1]
-            if num_ != 0:
+                count += i[1]
+            if count != 0:
                 output.append(str(round(sum/count,2)))
     return output
 
