@@ -21,19 +21,16 @@ def merge_datelist(x,y):
         output[i].update(y[i])
     return output
 
-def filter_cbg(dict_in,filter_list):
+def filter_cbg(input,cbg_list):
     output = []
-    for dict_ in dict_in:
-        if dict_ == {}: output.append('')
+    for item in input:
+        if item == {}: output.append('')
         else:
-            dict_out = []
-            for item in dict_:
-                if item in filter_list:
-                    dict_out.append((item,dict_[item]))
-            if dict_out != []:  
-                output.append(dict_out)
-            else:
-                output.append('')
+            out = []
+            for i in item:
+                if i in cbg_list: out.append((i,item[i]))
+            if out != []: output.append(out)
+            else: output.append('')
     return output
 
 def cbg_transfer(input,transfer_list):
