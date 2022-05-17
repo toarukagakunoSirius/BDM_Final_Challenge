@@ -119,8 +119,8 @@ if __name__ == "__main__":
     pat_date_cen = pat_date.map(lambda x: [x[0],filter_cbg(x[1],cbg_filter)])
 
 # transform cbg centroid coordinates
-    rdd_cbg_list = cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
-    pat_date_cen = pat_date_cen.map(lambda x: [x[0],transform_cbg(x[0],rdd_cbg_list),transform_cbg(x[1],rdd_cbg_list)])
+    cbg_list = cbg.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
+    pat_date_cen = pat_date_cen.map(lambda x: [x[0],transform_cbg(x[0],cbg_list),transform_cbg(x[1],cbg_list)])
 
 # mean distance
     pat_date_dis = pat_date_cen.map(lambda x: [x[0],distance(x[2],x[1])])
