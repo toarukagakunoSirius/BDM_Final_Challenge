@@ -23,8 +23,6 @@ if __name__ == "__main__":
     centroids = sc.textFile('nyc_cbg_centroids.csv')
     header = centroids.first()
     centroids = centroids.filter(lambda row : row != header) 
-    centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
-    centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
 
     def to_datelist(start,end,cbg):
         if start =='2019-03' or end == '2019-03': return [cbg,{},{},{}]
@@ -57,7 +55,11 @@ if __name__ == "__main__":
                     output.append('')
         return output
 
+    centroids_filter = centroids.map(lambda x: x.split(',')[0]).collect()
+
     rdd_task3 = rdd_task2.map(lambda x: [x[0],filter_cbg(x[1],centroids_filter)])
+
+    centroids_list = centroids.map(lambda x: [x.split(',')[0],x.split(',')[1],x.split(',')[2]]).collect()
 
     def transform_cbg(input,transfer_list):
         t = Transformer.from_crs(4326, 2263)
