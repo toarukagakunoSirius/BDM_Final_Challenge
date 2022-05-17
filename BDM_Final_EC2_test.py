@@ -81,8 +81,9 @@ def format_month_distance(x):
 if __name__ == '__main__':
     output = sys.argv[1]
     import os
-    nyc_cbg_centroids = os.getenv('SPARK_YARN_STAGING_DIR') + "/nyc_cbg_centroids.csv"
-    core_places_nyc = os.getenv('SPARK_YARN_STAGING_DIR') + "/core-places-nyc.csv"
+    #nyc_cbg_centroids = os.getenv('SPARK_YARN_STAGING_DIR') + "/nyc_cbg_centroids.csv"
+    nyc_cbg_centroids = "nyc_cbg_centroids.csv"
+    core_places_nyc = "/tmp/bdm/core-places-nyc.csv"
     weekly_patterns = "/tmp/bdm/weekly-patterns-nyc-2019-2020/*"
     import time
     start_time = time.time()
