@@ -23,32 +23,37 @@ def merge_datelist(x,y):
 
 def filter_cbg(input,centroids):
     output = []
-    for item in input:
-        if item == {}: output.append('')
+    for dict_ in input:
+        if dict_ == {}: output.append('')
         else:
-            out = []
-            for i in item:
-                if i in centroids: out.append((i,item[i]))
-            if out != []: output.append(out)
-            else: output.append('')
+            dict_out = []
+            for item in dict_:
+                if item in centroids:
+                    dict_out.append((item,dict_[item]))
+            if dict_out != []:  
+                output.append(dict_out)
+            else:
+                output.append('')
     return output
 
 def transform_cbg(input,centroids):
     t = Transformer.from_crs(4326, 2263)
     if type(input) == list: 
-        output = []
-        for item in input:
-            if item == '': output.append('')
+        list_out = []
+        for dict_ in input:
+            if dict_ == '': list_out.append('')
             else:
-                out = []
-                for i in item:
-                    for c in centroids:
-                        if i[0] == c[0]: out.append((t.transform(c[1],c[2]),i[1]))
-                output.append(out)
-        return output
+                dict_out = []
+                for item1 in dict_:
+                    for item2 in centroids:
+                        if item1[0] == item2[0]:
+                            dict_out.append((t.transform(item2[1],item2[2]),item1[1]))
+                list_out.append(dict_out)
+        return list_out
     else:
         for item in centroids:
-            if input == item[0]: return t.transform(item[1],item[2])
+            if input == item[0]:
+                return t.transform(item[1],item[2])
 
 def distance(start,end):
     output = []
