@@ -21,8 +21,8 @@ if __name__ == "__main__":
     core = sc.textFile('/tmp/bdm/core-places-nyc.csv')
     header = core.first()
     core = core.filter(lambda row : row != header) 
-    filter_list = core.map(lambda x: [x[0], x[9]]).collect()
-    filter_list = filter_list.filter(lambda x: str(x[1]).startswith('4451'))
+    filter_list = core.map(lambda x: [x[0], x[9]])
+    filter_list = filter_list.filter(lambda x: str(x[1]).startswith('4451')).collect()
 
     rdd_task1 = rdd_task1.filter(lambda x: x[0] in filter_list)
 
