@@ -101,8 +101,7 @@ if __name__ == "__main__":
     sc = pyspark.SparkContext.getOrCreate()
     spark = SparkSession(sc)
     
-    rdd_pattern = sc.textFile('weekly-patterns-nyc-2019-2020-sample.csv')
-    #rdd_pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
+    rdd_pattern = sc.textFile('/tmp/bdm/weekly-patterns-nyc-2019-2020').map(lambda x: next(csv.reader([x])))
     header = rdd_pattern.first()
     rdd_pattern = rdd_pattern.filter(lambda row : row != header) 
     rdd_filter = sc.textFile('nyc_supermarkets.csv')
