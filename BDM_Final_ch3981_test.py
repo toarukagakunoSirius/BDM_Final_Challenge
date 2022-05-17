@@ -50,15 +50,14 @@ def transform_cbg(input,cbg_list):
         for c in cbg_list:
             if input == c[0]: return t.transform(c[1],c[2])
 
-def distance(start_list,destination):
+def distance(start_list,end):
     output = []
     for item in start_list:
-        if item == '':
-            output.append('')
+        if item == '': output.append('')
         else:
             distance_list=[]
             for start in item:
-                distance_list.append((Point(start[0][0],start[0][1]).distance(Point(destination[0],destination[1]))/5280,start[1]))
+                distance_list.append((Point(start[0][0],start[0][1]).distance(Point(end[0],end[1]))/5280,start[1]))
             output.append(distance_list)
     return output
 
@@ -86,10 +85,8 @@ def median(input):
             ls_len = len(ls)
             ls.sort()
             index = (ls_len - 1)//2
-            if (ls_len % 2): 
-                output.append(str(round(ls[index],2)))
-            else: 
-                output.append(str(round((ls[index]+ls[index+1])/2,2)))
+            if (ls_len % 2): output.append(str(round(ls[index],2)))
+            else: output.append(str(round((ls[index]+ls[index+1])/2,2)))
     return output
             
 if __name__ == "__main__":
