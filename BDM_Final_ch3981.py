@@ -116,7 +116,25 @@ if __name__ == "__main__":
                 if num_ != 0:
                     output.append(str(round(sum_/num_,2)))
         return output
-    rdd_task5 = rdd_task4.map(lambda x: [x[0],mean_dist(x[1])])
+
+    def median(input):
+        output = []
+        for item in input:
+            if item == '': output.append('')
+            else:
+                ls = []
+                count = 0
+                for i in item:
+                    ls.append(i[0] * i[1])
+                    count += i[1]
+                ls = ls.sort()
+                if count != 0: 
+                    if count%2 == 0:
+                        output.append(str(round((ls[count/2]+ls[count/2-1])/2,2)))
+                    else: output.append(str(round(ls[count//2],2)))
+        return output
+
+    rdd_task5 = rdd_task4.map(lambda x: [x[0],median(x[1])])
 
     df_out = rdd_task5.map(lambda x: [str(x[0]),str(x[1][0]),str(x[1][1]) ,str(x[1][2]),str(x[1][3])])\
             .toDF(['cbg_fips', '2019-03' , '2019-10' , '2020-03' , '2020-10'])\
